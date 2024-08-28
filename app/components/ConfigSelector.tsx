@@ -1,4 +1,5 @@
-// components/ConfigSelector.tsx
+// File: components/ConfigSelector.tsx
+
 import React, { useState } from 'react';
 
 interface ConfigSelectorProps {
@@ -10,40 +11,27 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
     const [application, setApplication] = useState('account-management');
     const [label, setLabel] = useState('latest');
 
-    const handleSelect = () => {
+    const handleFetch = () => {
         onSelect(profile, application, label);
     };
 
     return (
         <div>
-            <label>
-                Profile:
-                <select value={profile} onChange={(e) => setProfile(e.target.value)}>
-                    <option value="sit">SIT</option>
-                    <option value="prod">PROD</option>
-                    <option value="local">LOCAL</option>
-                </select>
-            </label>
-
-            <label>
-                Application:
-                <select value={application} onChange={(e) => setApplication(e.target.value)}>
-                    <option value="account-management">Account Management</option>
-                    <option value="payment-ingress">Payment Ingress</option>
-                    {/* Add more applications as needed */}
-                </select>
-            </label>
-
-            <label>
-                Label:
-                <select value={label} onChange={(e) => setLabel(e.target.value)}>
-                    <option value="latest">Latest</option>
-                    <option value="stable">Stable</option>
-                    {/* Add more labels as needed */}
-                </select>
-            </label>
-
-            <button onClick={handleSelect}>Fetch Configuration</button>
+            <select value={profile} onChange={(e) => setProfile(e.target.value)}>
+                <option value="sit">SIT</option>
+                <option value="prod">PROD</option>
+                <option value="local">Local</option>
+                <option value="compare">Compare SIT and PROD</option>
+            </select>
+            <select value={application} onChange={(e) => setApplication(e.target.value)}>
+                <option value="account-management">Account Management</option>
+                {/* Add other applications here */}
+            </select>
+            <select value={label} onChange={(e) => setLabel(e.target.value)}>
+                <option value="latest">Latest</option>
+                {/* Add other labels here */}
+            </select>
+            <button onClick={handleFetch}>Fetch Configuration</button>
         </div>
     );
 };

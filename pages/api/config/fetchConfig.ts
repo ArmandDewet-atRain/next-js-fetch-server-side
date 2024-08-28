@@ -1,4 +1,5 @@
-// pages/api/config/fetchConfig.ts
+// File: pages/api/config/fetchConfig.ts
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -20,20 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     };
 
-    const getUrl = (profile: string, application: string, label: string) => {
-        if (profile === 'sit') {
-            return `https://api.sit.rain.co.za/axiom/configserver/${application}/${profile}/${label}`;
-        } else {
-            return `https://api.axiom.rain.co.za/bss-prod/configserver/${application}/${profile}/${label}`;
-        }
-    };
-
-    const { profile, application, label } = req.query as { profile: string; application: string; label: string };
+    const { profile, application, label } = req.query;
+    const url = profile === 'sit'
+        ? `https://api.sit.rain.co.za/axiom/configserver/${application}/${profile}/${label}`
+        : `https://api.axiom.rain.co.za/bss-prod/configserver/${application}/${profile}/${label}`;
 
     try {
-        console.log(`Fetching data for ${profile}, ${application}, ${label}...`);
-
-        const url = getUrl(profile, application, label);
         const data = await fetchWithGracefulErrorHandling(url, {
             method: 'GET',
             headers: {
@@ -41,6 +34,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 'Authorization': basicAuth,
             },
         });
+
+        if (!data) {
+            return res.status(500).json({ error: 'Failed to fetch data' });
+        }
 
         res.status(200).json(data);
     } catch (error: unknown) {

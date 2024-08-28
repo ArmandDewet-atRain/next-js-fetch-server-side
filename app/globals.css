@@ -1,4 +1,4 @@
-/* styles/globals.css */
+/* File: globals.css */
 
 body {
   font-family: Arial, sans-serif;
@@ -17,35 +17,26 @@ h1, h2 {
   text-align: center;
 }
 
-.data-sections {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
+.data-section, .diff-viewer {
+  margin-top: 20px;
 }
 
-.data-section {
-  flex: 1;
-  min-width: 300px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.diff-section {
-  margin-top: 30px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f1f1f1;
-}
-
-table {
+.diff-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
+
+.diff-table th, .diff-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.diff-table th {
+  background-color: #f4f4f4;
+}
+
 
 table, th, td {
   border: 1px solid #ddd;

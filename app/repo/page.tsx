@@ -1,33 +1,50 @@
+// File: app/page.tsx or app/index.tsx
+
 'use client';
+
 import React, { useState } from 'react';
 import ConfigSelector from '../components/ConfigSelector';
+import DiffViewer from '../repo/DiffViewer';
+import { PropertyData, CompareMaps } from '../types';
+import { compareData } from '../utils/compareData';
 
-const HomePage: React.FC = () => {
-    const [data, setData] = useState<{ [key: string]: any } | null>(null);
+const Page: React.FC = () => {
+    const [data, setData] = useState<PropertyData | null>(null);
+    const [comparison, setComparison] = useState<CompareMaps | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
 
     const fetchData = async (profile: string, application: string, label: string) => {
         setLoading(true);
         setError(null);
-        setSelectedProfile(profile);
-
-        const url = `/api/config/fetchConfig?profile=${profile}&application=${application}&label=${label}`;
-        console.log('Fetching URL:', url);
+        setComparison(null);
+        setData(null);
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch: ${response.status}`);
-            }
-            const result = await response.json();
-            console.log('Fetched Data:', result);
+            if (profile === 'compare') {
+                const sitResponse = await fetch(`/api/config/fetchConfig?profile=sit&application=${application}&label=${label}`);
+                const prodResponse = await fetch(`/api/config/fetchConfig?profile=prod&application=${application}&label=${label}`);
+                const localResponse = await fetch(`/api/config/fetchConfig?profile=local&application=${application}&label=${label}`);
 
-            setData((prevData) => ({
-                ...prevData,
-                [profile]: result,
-            }));
+                if (!sitResponse.ok || !prodResponse.ok || !localResponse.ok) {
+                    throw new Error('Failed to fetch SIT, PROD, or Local data');
+                }
+
+                const sitData = await sitResponse.json();
+                const prodData = await prodResponse.json();
+                const localData = await localResponse.json();
+
+                const comparisonResult = compareData(sitData, prodData, localData);
+                setComparison(comparisonResult);
+            } else {
+                const response = await fetch(`/api/config/fetchConfig?profile=${profile}&application=${application}&label=${label}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch: ${response.status}`);
+                }
+
+                const result = await response.json();
+                setData(result);
+            }
         } catch (error) {
             setError((error as Error).message);
             console.error('Failed to load configuration data:', error);
@@ -36,34 +53,44 @@ const HomePage: React.FC = () => {
         }
     };
 
+    const sortDataAlphabetically = (data: PropertyData | null): PropertyData | null => {
+        if (!data) return null;
+        
+        const sortedPropertySources = data.propertySources?.map((source) => ({
+            ...source,
+            source: Object.keys(source.source)
+                .sort()
+                .reduce((acc, key) => {
+                    acc[key] = source.source[key];
+                    return acc;
+                }, {} as { [key: string]: string }),
+        }));
+
+        return {
+            ...data,
+            propertySources: sortedPropertySources,
+        };
+    };
+
     return (
         <div className="container">
             <h1>Configuration Data</h1>
             <ConfigSelector onSelect={fetchData} />
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error}</p>}
-            <div className="data-container">
-                {selectedProfile === 'sit' && data?.sit && (
-                    <div className="data-section">
-                        <h2>SIT Data</h2>
-                        <pre>{JSON.stringify(data.sit, null, 2)}</pre>
-                    </div>
-                )}
-                {selectedProfile === 'prod' && data?.prod && (
-                    <div className="data-section">
-                        <h2>PROD Data</h2>
-                        <pre>{JSON.stringify(data.prod, null, 2)}</pre>
-                    </div>
-                )}
-                {selectedProfile === 'local' && data?.local && (
-                    <div className="data-section">
-                        <h2>LOCAL Data</h2>
-                        <pre>{JSON.stringify(data.local, null, 2)}</pre>
-                    </div>
-                )}
-            </div>
+            {data && (
+                <div className="data-section">
+                    <h2>{data.name} Data</h2>
+                    <pre>{JSON.stringify(sortDataAlphabetically(data), null, 2)}</pre>
+                </div>
+            )}
+            {comparison && (
+                <div className="diff-section">
+                    <DiffViewer comparison={comparison} />
+                </div>
+            )}
         </div>
     );
 };
 
-export default HomePage;
+export default Page;
