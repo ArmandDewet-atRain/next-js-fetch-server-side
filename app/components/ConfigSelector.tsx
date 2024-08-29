@@ -1,20 +1,37 @@
+// File: components/ConfigSelector.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ConfigSelectorProps {
     onSelect: (profile: string, application: string, label: string) => void;
 }
 
-const copy_and_commit_params = [
-    ["PrepayBalanceManagement", "prepay-balance-management"],
-    // ... (other entries)
-].sort((a, b) => a[0].localeCompare(b[0]));
-
 const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
     const [profile, setProfile] = useState('sit');
-    const [application, setApplication] = useState(copy_and_commit_params[0][1]);
+    const [application, setApplication] = useState('');
     const [label, setLabel] = useState('latest');
+    const [projects, setProjects] = useState<{ name: string; id: number }[]>([]);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const response = await fetch('/api/fetchProjects');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch projects: ${response.status}`);
+                }
+                const data = await response.json();
+                setProjects(data);
+                if (data.length > 0) {
+                    setApplication(data[0].id.toString());
+                }
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+            }
+        };
+
+        fetchProjects();
+    }, []);
 
     const handleFetch = () => {
         onSelect(profile, application, label);
@@ -29,9 +46,9 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
                 <option value="compare">Compare SIT and PROD</option>
             </select>
             <select value={application} onChange={(e) => setApplication(e.target.value)}>
-                {copy_and_commit_params.map(([name, value]) => (
-                    <option key={value} value={value}>
-                        {name}
+                {projects.map((project) => (
+                    <option key={project.id} value={project.name}>
+                        {project.name}
                     </option>
                 ))}
             </select>
