@@ -1,10 +1,8 @@
-// File: app/page.tsx or app/index.tsx
-
 'use client';
 
 import React, { useState } from 'react';
 import ConfigSelector from '../components/ConfigSelector';
-import DiffViewer from '../repo/DiffViewer'; // Adjusted the import path
+import DiffViewer from '../repo/DiffViewer'; 
 import { PropertyData, CompareMaps } from '../types';
 import { compareData } from '../utils/compareData';
 
@@ -43,7 +41,7 @@ const Page: React.FC = () => {
                 }
 
                 const result = await response.json();
-                setData(result);
+                setData(sortDataAlphabetically(result));
             }
         } catch (error) {
             setError((error as Error).message);
@@ -53,9 +51,7 @@ const Page: React.FC = () => {
         }
     };
 
-    const sortDataAlphabetically = (data: PropertyData | null): PropertyData | null => {
-        if (!data) return null;
-
+    const sortDataAlphabetically = (data: PropertyData): PropertyData => {
         const sortedPropertySources = data.propertySources?.map((source) => ({
             ...source,
             source: Object.keys(source.source)
@@ -76,12 +72,12 @@ const Page: React.FC = () => {
         <div className="container">
             <h1>Configuration Data</h1>
             <ConfigSelector onSelect={fetchData} />
-            {loading && <p>Loading...</p>}
-            {error && <p>Error: {error}</p>}
+            {loading && <p className="loading">Loading...</p>}
+            {error && <p className="error">Error: {error}</p>}
             {data && (
                 <div className="data-section">
                     <h2>{data.name} Data</h2>
-                    <pre className="codeBox">{JSON.stringify(sortDataAlphabetically(data), null, 2)}</pre>
+                    <pre className="codeBox">{JSON.stringify(data, null, 2)}</pre>
                 </div>
             )}
             {comparison && (

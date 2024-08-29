@@ -1,4 +1,3 @@
-// File: components/ConfigSelector.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,31 +10,35 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
     const [profile, setProfile] = useState('sit');
     const [application, setApplication] = useState('');
     const [label, setLabel] = useState('latest');
-    const [projects, setProjects] = useState<{ name: string; id: number }[]>([]);
+    const [applications, setApplications] = useState<string[]>([]);
 
+    // Fetch the list of applications on component mount
     useEffect(() => {
-        const fetchProjects = async () => {
+        const fetchApplications = async () => {
             try {
-                const response = await fetch('/api/fetchProjects');
+                const response = await fetch('/api/fetchProjects'); // Replace this with your endpoint to fetch the projects
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch projects: ${response.status}`);
+                    throw new Error('Failed to fetch applications');
                 }
                 const data = await response.json();
-                setProjects(data);
+                setApplications(data.map((proj: any) => proj.name)); // Adjust based on your API structure
                 if (data.length > 0) {
-                    setApplication(data[0].id.toString());
+                    setApplication(data[0].name); // Set the first application as default
                 }
             } catch (error) {
-                console.error('Error fetching projects:', error);
+                console.error('Error fetching applications:', error);
             }
         };
 
-        fetchProjects();
+        fetchApplications();
     }, []);
 
-    const handleFetch = () => {
-        onSelect(profile, application, label);
-    };
+    // Automatically trigger the fetch data function when the dropdowns change
+    useEffect(() => {
+        if (application) {
+            onSelect(profile, application, label);
+        }
+    }, [profile, application, label]);
 
     return (
         <div>
@@ -46,9 +49,9 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
                 <option value="compare">Compare SIT and PROD</option>
             </select>
             <select value={application} onChange={(e) => setApplication(e.target.value)}>
-                {projects.map((project) => (
-                    <option key={project.id} value={project.name}>
-                        {project.name}
+                {applications.map((app) => (
+                    <option key={app} value={app}>
+                        {app}
                     </option>
                 ))}
             </select>
@@ -56,7 +59,6 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
                 <option value="latest">Latest</option>
                 <option value="stable">Stable</option>
             </select>
-            <button onClick={handleFetch}>Fetch Configuration</button>
         </div>
     );
 };
