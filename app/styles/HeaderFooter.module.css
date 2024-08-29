@@ -1,0 +1,17 @@
+.header {
+    background-color: #0072ce;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 20px;
+    max-width: 100%; 
+    margin: 0 auto; 
+    border-radius: 4px;
+  }
+  
+  .footer {
+    background-color: #0072ce;
+    padding: 10px 20px;
+    color: #ffffff;
+    text-align: center;
+    margin-top: 20px;
+  }

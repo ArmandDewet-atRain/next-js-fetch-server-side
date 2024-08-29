@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import ConfigSelector from '../components/ConfigSelector';
-import DiffViewer from '../repo/DiffViewer';
+import DiffViewer from '../repo/DiffViewer'; // Adjusted the import path
 import { PropertyData, CompareMaps } from '../types';
 import { compareData } from '../utils/compareData';
 
@@ -55,7 +55,7 @@ const Page: React.FC = () => {
 
     const sortDataAlphabetically = (data: PropertyData | null): PropertyData | null => {
         if (!data) return null;
-        
+
         const sortedPropertySources = data.propertySources?.map((source) => ({
             ...source,
             source: Object.keys(source.source)
@@ -81,11 +81,11 @@ const Page: React.FC = () => {
             {data && (
                 <div className="data-section">
                     <h2>{data.name} Data</h2>
-                    <pre>{JSON.stringify(sortDataAlphabetically(data), null, 2)}</pre>
+                    <pre className="codeBox">{JSON.stringify(sortDataAlphabetically(data), null, 2)}</pre>
                 </div>
             )}
             {comparison && (
-                <div className="diff-section">
+                <div className="diff-viewer">
                     <DiffViewer comparison={comparison} />
                 </div>
             )}

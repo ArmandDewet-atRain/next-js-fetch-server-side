@@ -1,38 +1,39 @@
-// File: repo/DiffViewer.tsx
+// File: components/DiffViewer.tsx
 
 import React from 'react';
 import { CompareMaps } from '../types';
 
-const DiffViewer: React.FC<{ comparison: CompareMaps }> = ({ comparison }) => {
-    const differences = Object.entries(comparison.source)
-        .filter(([, value]) => value.different)
-        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)); // Sort alphabetically by key
+interface DiffViewerProps {
+    comparison: CompareMaps;
+}
 
-    if (differences.length === 0) {
-        return <p>No differences found between SIT, PROD, and Local data.</p>;
-    }
-
+const DiffViewer: React.FC<DiffViewerProps> = ({ comparison }) => {
     return (
-        <div className="diff-viewer">
-            <h2>Differences</h2>
+        <div className="diffViewer">
+            <h2>Comparison Results</h2>
             <table className="diff-table">
                 <thead>
                     <tr>
                         <th>Key</th>
                         <th>SIT</th>
                         <th>PROD</th>
-                        <th>Local</th>
+                        <th>LOCAL</th>
+                        <th>Differences</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {differences.map(([key, value]) => (
-                        <tr key={key}>
-                            <td>{key}</td>
-                            <td>{value.sit}</td>
-                            <td>{value.prod}</td>
-                            <td>{value.local}</td>
-                        </tr>
-                    ))}
+                    {Object.keys(comparison.source).map((key) => {
+                        const { sit, prod, local, different } = comparison.source[key];
+                        return (
+                            <tr key={key} className={different ? 'highlight' : ''}>
+                                <td>{key}</td>
+                                <td>{sit}</td>
+                                <td>{prod}</td>
+                                <td>{local}</td>
+                                <td>{different ? 'Yes' : 'No'}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
