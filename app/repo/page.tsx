@@ -12,6 +12,8 @@ const Page: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [comparisonType, setComparisonType] = useState<'sitProd' | 'localSit'>('sitProd');
+    const [showDifferencesOnly, setShowDifferencesOnly] = useState<boolean>(false);
+    const [selectedEnvironment, setSelectedEnvironment] = useState<'sit' | 'prod' | 'local'>('sit');
 
     const fetchData = async (profile: string, application: string, label: string) => {
         setLoading(true);
@@ -34,8 +36,8 @@ const Page: React.FC = () => {
                 const secondData = await secondResponse.json();
 
                 const comparisonResult = comparisonType === 'sitProd'
-                    ? compareData(sitData, secondData, sitData)
-                    : compareData(sitData, sitData, secondData);
+                    ? compareData(sitData, secondData, sortDataAlphabetically(sitData))
+                    : compareData(sitData, sortDataAlphabetically(sitData), sortDataAlphabetically(secondData));
 
                 setComparison(comparisonResult);
             } else {
@@ -72,6 +74,31 @@ const Page: React.FC = () => {
         };
     };
 
+    const formatPropertiesFile = () => {
+        if (!comparison) return '';
+
+        return Object.entries(comparison.source)
+            .filter(([_, value]) => value.different) // Filter to include only different values
+            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // Sort alphabetically by key
+            .map(([key, value]) => {
+                let selectedValue = '';
+                if (selectedEnvironment === 'sit') {
+                    selectedValue = value.sit;
+                } else if (selectedEnvironment === 'prod') {
+                    selectedValue = value.prod;
+                } else if (selectedEnvironment === 'local') {
+                    selectedValue = value.local;
+                }
+                // Exclude entries with 'N/A'
+                if (selectedValue !== 'N/A') {
+                    return `${key}=${selectedValue}`;
+                }
+                return null;
+            })
+            .filter(entry => entry !== null) // Remove any null entries
+            .join('\n');
+    };
+
     return (
         <div className="container">
             <h1>Configuration Data</h1>
@@ -81,6 +108,17 @@ const Page: React.FC = () => {
                 <select onChange={(e) => setComparisonType(e.target.value as 'sitProd' | 'localSit')}>
                     <option value="sitProd">SIT vs PROD</option>
                     <option value="localSit">LOCAL vs SIT</option>
+                </select>
+
+                <select onChange={(e) => setShowDifferencesOnly(e.target.value === 'differences')}>
+                    <option value="all">Show All</option>
+                    <option value="differences">Show Differences Only</option>
+                </select>
+
+                <select onChange={(e) => setSelectedEnvironment(e.target.value as 'sit' | 'prod' | 'local')}>
+                    <option value="sit">SIT</option>
+                    <option value="prod">PROD</option>
+                    <option value="local">LOCAL</option>
                 </select>
             </div>
 
@@ -93,9 +131,18 @@ const Page: React.FC = () => {
                 </div>
             )}
             {comparison && (
-                <div className="diff-viewer">
-                    <DiffViewer comparison={comparison} comparisonType={comparisonType} />
-                </div>
+                <>
+                    <div className="diff-viewer">
+                        <DiffViewer comparison={comparison} comparisonType={comparisonType} showDifferencesOnly={showDifferencesOnly} />
+                    </div>
+
+                    <div className="properties-file-display">
+                        <h2>{selectedEnvironment.toUpperCase()} Differences</h2>
+                        <pre className="codeBox" style={{ whiteSpace: 'pre-wrap' }}>
+                            {formatPropertiesFile()}
+                        </pre>
+                    </div>
+                </>
             )}
         </div>
     );
