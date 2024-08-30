@@ -13,7 +13,7 @@ const Page: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [comparisonType, setComparisonType] = useState<'sitProd' | 'localSit'>('sitProd');
     const [showDifferencesOnly, setShowDifferencesOnly] = useState<boolean>(false);
-    const [selectedEnvironment, setSelectedEnvironment] = useState<'sit' | 'prod' | 'local'>('sit');
+    const [selectedEnvironment, setSelectedEnvironment] = useState<'sit' | 'prod' | 'local' | 'prodSQL' | 'sitSQL' | 'localSQL'>('sit');
 
     const fetchData = async (profile: string, application: string, label: string) => {
         setLoading(true);
@@ -76,27 +76,40 @@ const Page: React.FC = () => {
 
     const formatPropertiesFile = () => {
         if (!comparison) return '';
-
+    
+        const applicationName = 'payment-ingress'; // Replace this with the actual application name you want to use
+    
         return Object.entries(comparison.source)
             .filter(([_, value]) => value.different) // Filter to include only different values
             .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // Sort alphabetically by key
             .map(([key, value]) => {
                 let selectedValue = '';
-                if (selectedEnvironment === 'sit') {
+                if (selectedEnvironment === 'sit' || selectedEnvironment === 'sitSQL') {
                     selectedValue = value.sit;
-                } else if (selectedEnvironment === 'prod') {
+                } else if (selectedEnvironment === 'prod' || selectedEnvironment === 'prodSQL') {
                     selectedValue = value.prod;
-                } else if (selectedEnvironment === 'local') {
+                } else if (selectedEnvironment === 'local' || selectedEnvironment === 'localSQL') {
                     selectedValue = value.local;
                 }
-                // Exclude entries with 'N/A'
-                if (selectedValue !== 'N/A') {
+                // Replace 'N/A' with an empty string
+                if (selectedValue === 'N/A') {
+                    selectedValue = '';
+                }
+    
+                if (selectedEnvironment === 'prodSQL' || selectedEnvironment === 'sitSQL' || selectedEnvironment === 'localSQL') {
+                    return `insert into public.properties (application, prop_key, value) values ('${applicationName}', '${key}', '${selectedValue}');`;
+                } else {
                     return `${key}=${selectedValue}`;
                 }
-                return null;
             })
-            .filter(entry => entry !== null) // Remove any null entries
             .join('\n');
+    };
+
+    const handleCopyToClipboard = () => {
+        const formattedProperties = formatPropertiesFile();
+        navigator.clipboard.writeText(formattedProperties)
+            .then(() => alert('Properties copied to clipboard!'))
+            .catch(err => console.error('Failed to copy text: ', err));
     };
 
     return (
@@ -115,10 +128,13 @@ const Page: React.FC = () => {
                     <option value="differences">Show Differences Only</option>
                 </select>
 
-                <select onChange={(e) => setSelectedEnvironment(e.target.value as 'sit' | 'prod' | 'local')}>
+                <select onChange={(e) => setSelectedEnvironment(e.target.value as 'sit' | 'prod' | 'local' | 'prodSQL' | 'sitSQL' | 'localSQL')}>
                     <option value="sit">SIT</option>
                     <option value="prod">PROD</option>
                     <option value="local">LOCAL</option>
+                    <option value="sitSQL">SIT SQL</option>
+                    <option value="prodSQL">PROD SQL</option>
+                    <option value="localSQL">LOCAL SQL</option>
                 </select>
             </div>
 
@@ -137,7 +153,12 @@ const Page: React.FC = () => {
                     </div>
 
                     <div className="properties-file-display">
-                        <h2>{selectedEnvironment.toUpperCase()} Differences</h2>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <h2>{selectedEnvironment.toUpperCase()} Differences</h2>
+                            <button onClick={handleCopyToClipboard} style={{ marginLeft: '10px', padding: '5px 10px', cursor: 'pointer' }}>
+                                Copy to Clipboard
+                            </button>
+                        </div>
                         <pre className="codeBox" style={{ whiteSpace: 'pre-wrap' }}>
                             {formatPropertiesFile()}
                         </pre>
