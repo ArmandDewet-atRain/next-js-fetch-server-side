@@ -8,20 +8,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'GitLab token not found' });
     }
 
-    try {
-        const response = await fetch('https://git.rain.network/api/v4/groups/263/projects', {
-            headers: {
-                'PRIVATE-TOKEN': gitlabToken,
-            },
-        });
+    const groupId = '263'; // Replace with your actual group ID
+    let page = 1;
+    let allProjects: any[] = [];
+    let hasMoreProjects = true;
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            return res.status(response.status).json({ error: errorText });
+    try {
+        while (hasMoreProjects) {
+            const response = await fetch(`https://git.rain.network/api/v4/groups/${groupId}/projects?per_page=100&page=${page}`, {
+                headers: {
+                    'PRIVATE-TOKEN': gitlabToken,
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                return res.status(response.status).json({ error: errorText });
+            }
+
+            const projects = await response.json();
+            allProjects = [...allProjects, ...projects];
+
+            if (projects.length < 100) {
+                hasMoreProjects = false;
+            } else {
+                page++;
+            }
         }
 
-        const projects = await response.json();
-        res.status(200).json(projects);
+        res.status(200).json(allProjects);
     } catch (error: unknown) {
         res.status(500).json({ error: (error as Error).message });
     }
