@@ -11,6 +11,7 @@ const Page: React.FC = () => {
     const [comparison, setComparison] = useState<CompareMaps | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [comparisonType, setComparisonType] = useState<'sitProd' | 'localSit'>('sitProd');
 
     const fetchData = async (profile: string, application: string, label: string) => {
         setLoading(true);
@@ -21,18 +22,21 @@ const Page: React.FC = () => {
         try {
             if (profile === 'compare') {
                 const sitResponse = await fetch(`/api/config/fetchConfig?profile=sit&application=${application}&label=${label}`);
-                const prodResponse = await fetch(`/api/config/fetchConfig?profile=prod&application=${application}&label=${label}`);
-                const localResponse = await fetch(`/api/config/fetchConfig?profile=local&application=${application}&label=${label}`);
+                const secondResponse = comparisonType === 'sitProd'
+                    ? await fetch(`/api/config/fetchConfig?profile=prod&application=${application}&label=${label}`)
+                    : await fetch(`/api/config/fetchConfig?profile=local&application=${application}&label=${label}`);
 
-                if (!sitResponse.ok || !prodResponse.ok || !localResponse.ok) {
+                if (!sitResponse.ok || !secondResponse.ok) {
                     throw new Error('Failed to fetch SIT, PROD, or Local data');
                 }
 
                 const sitData = await sitResponse.json();
-                const prodData = await prodResponse.json();
-                const localData = await localResponse.json();
+                const secondData = await secondResponse.json();
 
-                const comparisonResult = compareData(sitData, prodData, localData);
+                const comparisonResult = comparisonType === 'sitProd'
+                    ? compareData(sitData, secondData, sitData)
+                    : compareData(sitData, sitData, secondData);
+
                 setComparison(comparisonResult);
             } else {
                 const response = await fetch(`/api/config/fetchConfig?profile=${profile}&application=${application}&label=${label}`);
@@ -72,6 +76,14 @@ const Page: React.FC = () => {
         <div className="container">
             <h1>Configuration Data</h1>
             <ConfigSelector onSelect={fetchData} />
+            
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '20px' }}>
+                <select onChange={(e) => setComparisonType(e.target.value as 'sitProd' | 'localSit')}>
+                    <option value="sitProd">SIT vs PROD</option>
+                    <option value="localSit">LOCAL vs SIT</option>
+                </select>
+            </div>
+
             {loading && <p className="loading">Loading...</p>}
             {error && <p className="error">Error: {error}</p>}
             {data && (
@@ -82,7 +94,7 @@ const Page: React.FC = () => {
             )}
             {comparison && (
                 <div className="diff-viewer">
-                    <DiffViewer comparison={comparison} />
+                    <DiffViewer comparison={comparison} comparisonType={comparisonType} />
                 </div>
             )}
         </div>
