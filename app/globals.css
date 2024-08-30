@@ -1,81 +1,90 @@
+/* Git-like color styles for differences */
+.diff-added {
+  background-color: #d4f8d4; 
+}
+
+.diff-removed {
+  background-color: #f8d4d4; 
+}
+
+.diff-modified {
+  background-color: #fff3cd; 
+}
+
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f7f6;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: #010101;
+  color: #333;
 }
 
 .container {
-  background-color: #c5f1ec;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 1200px;
-  margin: 20px auto;
+  max-width: 1400px;
+  margin: 40px auto;
   padding: 20px;
+  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-h1, h2 {
-  text-align: center;
-  color: #333;
-}
-
-.data-section, .diff-viewer {
-  margin-top: 20px;
-}
-
-.codeBox {
-  background-color: #000000;
-  padding: 15px;
-  border-radius: 4px;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+.controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 20px;
-  border: 1px solid #ddd;
 }
 
-select {
-  padding: 10px;
-  font-size: 16px;
-  margin: 10px 0;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.controls select,
+.controls button {
+  flex: 1;
+  margin: 5px;
+  max-width: 300px;
 }
 
 .diff-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .diff-table th, .diff-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: left;
 }
 
 .diff-table th {
   background-color: #f4f4f4;
+  font-weight: 500;
 }
 
-.highlight span {
-  background-color: #ffdddd;
+.diff-table td {
+  background-color: #ffffff;
 }
 
-.loading, .error {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 18px;
-  color: #ff0000;
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .controls select,
+  .controls button {
+    max-width: none;
+    width: 100%;
+  }
 }
-.properties-file-display {
+
+.codeBox {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
   margin-top: 20px;
-  padding: 20px;
-  background-color: #f4f4f4;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

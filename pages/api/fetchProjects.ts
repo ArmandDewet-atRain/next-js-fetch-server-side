@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'GitLab token not found' });
     }
 
-    const groupId = '263'; // Replace with your actual group ID
+    const groupId = '263'; 
     let page = 1;
     let allProjects: any[] = [];
     let hasMoreProjects = true;

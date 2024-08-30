@@ -16,16 +16,16 @@ export function compareData(sit: PropertyData, prod: PropertyData, local: Proper
         return map;
     };
 
-    // Map SIT and PROD data
+    
     Object.assign(sitMap, mapPropertySources(sit.propertySources));
     Object.assign(prodMap, mapPropertySources(prod.propertySources));
 
-    // Check if local propertySources exist and handle accordingly
+    
     if (local && local.propertySources) {
         Object.assign(localMap, mapPropertySources(local.propertySources));
     }
 
-    // Get all unique keys and sort them alphabetically
+   
     const allKeys = Array.from(new Set([...Object.keys(sitMap), ...Object.keys(prodMap), ...Object.keys(localMap)])).sort();
 
     allKeys.forEach((key) => {
@@ -33,7 +33,7 @@ export function compareData(sit: PropertyData, prod: PropertyData, local: Proper
         const prodValue = prodMap[key] || 'N/A';
         const localValue = localMap[key] || 'N/A';
 
-        // Compare values and determine if there's a difference
+        
         const different = sitValue !== prodValue || sitValue !== localValue || prodValue !== localValue;
 
         comparison.source[key] = {

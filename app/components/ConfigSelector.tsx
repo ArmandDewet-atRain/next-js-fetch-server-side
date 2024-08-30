@@ -12,18 +12,18 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
     const [label, setLabel] = useState('latest');
     const [applications, setApplications] = useState<string[]>([]);
 
-    // Fetch the list of applications on component mount
+    
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await fetch('/api/fetchProjects'); // Replace this with your endpoint to fetch the projects
+                const response = await fetch('/api/fetchProjects'); 
                 if (!response.ok) {
                     throw new Error('Failed to fetch applications');
                 }
                 const data = await response.json();
-                setApplications(data.map((proj: any) => proj.name)); // Adjust based on your API structure
+                setApplications(data.map((proj: any) => proj.name)); 
                 if (data.length > 0) {
-                    setApplication(data[0].name); // Set the first application as default
+                    setApplication(data[0].name); 
                 }
             } catch (error) {
                 console.error('Error fetching applications:', error);
@@ -33,7 +33,7 @@ const ConfigSelector: React.FC<ConfigSelectorProps> = ({ onSelect }) => {
         fetchApplications();
     }, []);
 
-    // Automatically trigger the fetch data function when the dropdowns change
+    
     useEffect(() => {
         if (application) {
             onSelect(profile, application, label);

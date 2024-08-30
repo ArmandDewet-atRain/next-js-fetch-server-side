@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (profile === 'prod') {
         url = `https://api.axiom.rain.co.za/bss-prod/configserver/${application}/${profile}/${label}`;
     } else if (profile === 'local') {
-        // Fetch the project ID for the selected application in the local environment
+        
         const projectId = await fetchProjectIdByName(application as string, gitlabToken);
 
         if (!projectId) {

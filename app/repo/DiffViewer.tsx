@@ -8,6 +8,12 @@ interface DiffViewerProps {
 }
 
 const DiffViewer: React.FC<DiffViewerProps> = ({ comparison, comparisonType, showDifferencesOnly }) => {
+    const getClassNameForDifference = (value: string | undefined) => {
+        if (!value || value === '') return ''; 
+        if (value === 'N/A') return 'diff-removed'; 
+        return 'diff-modified'; 
+    };
+
     return (
         <table className="diff-table">
             <thead>
@@ -26,10 +32,18 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ comparison, comparisonType, sho
                     .map(([key, value]) => (
                         <tr key={key}>
                             <td>{key}</td>
-                            {comparisonType === 'sitProd' && <td>{value.sit}</td>}
-                            {comparisonType === 'sitProd' && <td>{value.prod}</td>}
-                            {comparisonType === 'localSit' && <td>{value.local}</td>}
-                            {comparisonType === 'localSit' && <td>{value.sit}</td>}
+                            {comparisonType === 'sitProd' && (
+                                <>
+                                    <td className={getClassNameForDifference(value.sit)}>{value.sit}</td>
+                                    <td className={getClassNameForDifference(value.prod)}>{value.prod}</td>
+                                </>
+                            )}
+                            {comparisonType === 'localSit' && (
+                                <>
+                                    <td className={getClassNameForDifference(value.local)}>{value.local}</td>
+                                    <td className={getClassNameForDifference(value.sit)}>{value.sit}</td>
+                                </>
+                            )}
                             <td>{value.different ? 'Yes' : 'No'}</td>
                         </tr>
                 ))}

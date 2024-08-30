@@ -5,7 +5,7 @@ import ConfigSelector from '../components/ConfigSelector';
 import DiffViewer from '../repo/DiffViewer'; 
 import { PropertyData, CompareMaps } from '../types';
 import { compareData } from '../utils/compareData';
-
+import '../globals.css';
 const Page: React.FC = () => {
     const [data, setData] = useState<PropertyData | null>(null);
     const [comparison, setComparison] = useState<CompareMaps | null>(null);
@@ -77,11 +77,11 @@ const Page: React.FC = () => {
     const formatPropertiesFile = () => {
         if (!comparison) return '';
     
-        const applicationName = 'payment-ingress'; // Replace this with the actual application name you want to use
+        const applicationName = 'payment-ingress'; 
     
         return Object.entries(comparison.source)
-            .filter(([_, value]) => value.different) // Filter to include only different values
-            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // Sort alphabetically by key
+            .filter(([_, value]) => value.different) 
+            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) 
             .map(([key, value]) => {
                 let selectedValue = '';
                 if (selectedEnvironment === 'sit' || selectedEnvironment === 'sitSQL') {
@@ -91,7 +91,7 @@ const Page: React.FC = () => {
                 } else if (selectedEnvironment === 'local' || selectedEnvironment === 'localSQL') {
                     selectedValue = value.local;
                 }
-                // Replace 'N/A' with an empty string
+                
                 if (selectedValue === 'N/A') {
                     selectedValue = '';
                 }
